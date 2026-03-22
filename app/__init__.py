@@ -10,21 +10,11 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
 
-    CORS(app, resources={
-        r"/api/*": {
-            "origins": os.getenv("FRONTEND_ORIGIN", "*"),
-            # El frontend envía estos headers personalizados de autenticación
-            "allow_headers": [
-                "Content-Type",
-                "X-User-Role",
-                "X-User-Id",
-                "X-User-Nombre",
-                "X-User-Username",
-            ],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        }
-    })
-
+    CORS(app, 
+     origins="*",
+     allow_headers=["Content-Type", "X-User-Role", "X-User-Id", "X-User-Nombre", "X-User-Username"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        )
     # ── Blueprints ────────────────────────────────────────────────
     from app.routes.auth        import auth_bp
     from app.routes.director    import director_bp
