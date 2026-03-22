@@ -17,45 +17,25 @@ def get_obras(current_user):
     try:
         with get_db() as (conn, cur):
             cur.execute("""
-                SELECT
-                    o.id_obra AS "id",
-                    o.codigo_expediente AS "expediente",
-                    o.nombre_obra AS "nombre",
-                    o.etapa,
-                    o.id_constructora AS "constructoraId",
-                    c.nombre_const AS "constructoraNombre",
-                    o.id_region AS "regionId",
-                    r.comunidad || ' - ' || r.barrio AS "regionNombre",
-                    o.codigo_supervisor AS "supervisorId",
-                    p.nombre || ' ' || p.apellido_paterno AS "supervisorNombre",
-                    o.fecha_inicio AS "fechaInicio",
-                    o.fecha_final AS "fechaFin",
-                    o.descripcion,
-                    o.beneficiarios,
-                    COALESCE(pre.presupuesto_total, 0) AS "presupuesto",
-                    COALESCE(
-                        json_agg(f.id_fuente) FILTER (WHERE f.id_fuente IS NOT NULL), 
-                        '[]'
-                    ) AS fuentes
-                FROM public.obra o
-                LEFT JOIN public.constructora c  ON o.id_constructora = c.id_constructora
-                LEFT JOIN public.region r        ON o.id_region = r.id_region
-                LEFT JOIN public.personal p      ON o.codigo_supervisor = p.codigo_personal
-                LEFT JOIN public.presupuesto_obra pre ON o.id_obra = pre.id_obra
-                LEFT JOIN public.financia f      ON o.id_obra = f.id_obra
-                WHERE (%s IS NULL OR o.codigo_supervisor = %s)
-                  AND (%s = '' OR o.nombre_obra ILIKE %s OR o.codigo_expediente ILIKE %s)
-                GROUP BY 
-                    o.id_obra, o.codigo_expediente, o.nombre_obra, o.etapa, 
-                    o.id_constructora, c.nombre_const, o.id_region, r.comunidad, 
-                    r.barrio, o.codigo_supervisor, p.nombre, p.apellido_paterno, 
-                    o.fecha_inicio, o.fecha_final, o.descripcion, o.beneficiarios,
-                    pre.presupuesto_total
-                ORDER BY o.fecha_inicio DESC
-            """, (
-                supervisor_filter, supervisor_filter,
-                search, f"%{search}%", f"%{search}%"
-            ))
+    INSERT INTO public.obra (
+        id_obra, codigo_expediente, nombre_obra, etapa,
+        fecha_inicio, fecha_final, descripcion, beneficiarios,
+        id_constructora, id_region, codigo_supervisor, status
+    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+""", (
+    obra_id[:20],
+    body["expediente"][:15],   # ← CHAR(15)
+    body["nombre"][:200],
+    body.get("etapa", 1),
+    body.get("fechaInicio"),
+    body.get("fechaFin"),
+    body.get("descripcion", "")[:500],
+    body.get("beneficiarios", "")[:500],
+    body.get("constructoraId", "")[:10],  # ← CHAR(10)
+    body.get("regionId", "")[:5],         # ← CHAR(5)
+    body.get("supervisorId", "")[:20],    # ← CHAR(20)
+    "activa"
+))
             obras = [dict(row) for row in cur.fetchall()]
 
         return ok(obras)
@@ -100,7 +80,7 @@ def create_obra(current_user):
                 body["supervisorId"]
             ))
 
-            presupuesto_id = f"PRE-{body['expediente']}"
+            presupuesto_id = f"PRE-{body['expediente']}"[:10].strip()
             cur.execute("""
                 INSERT INTO public.presupuesto_obra (
                     id_presupuesto, presupuesto_total, id_proyectista, id_obra
