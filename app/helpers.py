@@ -20,6 +20,21 @@ def ok(data=None, message: str = "OK", status: int = 200):
 def created(data=None, message: str = "Creado exitosamente"):
     return ok(data, message, 201)
 
+def db_error_response(exc: Exception):
+    if isinstance(exc, psycopg2.errors.UniqueViolation):
+        return jsonify({"success": False, "message": "Ya existe un registro con ese identificador único."}), 409
+    if isinstance(exc, psycopg2.errors.ForeignKeyViolation):
+        return jsonify({"success": False, "message": "El registro referenciado no existe (FK)."}), 409
+    if isinstance(exc, psycopg2.errors.NotNullViolation):
+        return jsonify({"success": False, "message": "Un campo obligatorio llegó vacío a la base de datos."}), 400
+
+    # TEMPORAL — mostrar error real para debug
+    print(f"[DB ERROR] {type(exc).__name__}: {exc}")
+    return jsonify({
+        "success": False,
+        "message": f"[DEBUG] {type(exc).__name__}: {str(exc)}"
+    }), 500
+
 
 def bad_request(message: str = "Petición inválida"):
     return jsonify({"success": False, "message": message}), 400
