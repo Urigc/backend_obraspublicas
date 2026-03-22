@@ -76,7 +76,7 @@ def create_obra(current_user):
                 body.get("descripcion", ""),
                 body.get("beneficiarios", ""),
                 body["constructoraId"],
-                body["regionId"],
+                body.get("region", "")[:5],
                 body["supervisorId"]
             ))
 
