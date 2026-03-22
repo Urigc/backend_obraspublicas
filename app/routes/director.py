@@ -5,6 +5,7 @@ from app.helpers import ok, created, bad_request, not_found, db_error_response, 
 from app.middleware.auth import require_auth
 
 director_bp = Blueprint("director", __name__)
+
 # ── GET /api/obras ───────────────────────────────────────────────
 @director_bp.route("/api/obras", methods=["GET"])
 @require_auth("director", "supervisor", "proyectista", "secretaria")
@@ -12,8 +13,10 @@ def get_obras(current_user):
     supervisor_filter = request.args.get("supervisor")
     status_filter     = request.args.get("status")
     search            = request.args.get("q", "").strip()
+    
 
     try:
+        
         with get_db() as (conn, cur):
         
             cur.execute("""
@@ -50,6 +53,8 @@ def get_obras(current_user):
 def create_obra(current_user):
 
     body = request.get_json(silent=True) or {}
+    return jsonify({"debug": True, "body_recibido": body}), 200
+    
 
     valid, err = require_fields(body, "expediente", "nombre", "region")
     if not valid:
@@ -75,9 +80,9 @@ def create_obra(current_user):
                 body.get("fechaFin"),
                 body.get("descripcion", ""),
                 body.get("beneficiarios", ""),
-                body.get("constructoraId", "")[:10].strip(),
-                body.get("region", "")[:5].strip(),
-                body.get("supervisorId", "")[:20].strip(),
+                body["constructoraId"],
+                body.get("region", "")[:5],
+                body["supervisorId"]
             ))
 
             presupuesto_id = f"PRE-{body['expediente']}"[:10].strip()
