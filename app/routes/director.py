@@ -6,7 +6,7 @@ from app.middleware.auth import require_auth
 
 director_bp = Blueprint("director", __name__)
 
-print(f"[DEBUG] obra_id={obra_id}, constructora={body.get('constructoraId')}, region={body.get('region')}, supervisor={body.get('supervisorId')}")
+print(f"[DEBUG] constructora={body.get('constructoraId')}, region={body.get('region')}, supervisor={body.get('supervisorId')}")
 # ── GET /api/obras ───────────────────────────────────────────────
 @director_bp.route("/api/obras", methods=["GET"])
 @require_auth("director", "supervisor", "proyectista", "secretaria")
