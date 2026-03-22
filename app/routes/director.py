@@ -5,8 +5,6 @@ from app.helpers import ok, created, bad_request, not_found, db_error_response, 
 from app.middleware.auth import require_auth
 
 director_bp = Blueprint("director", __name__)
-
-print(f"[DEBUG] constructora={body.get('constructoraId')}, region={body.get('region')}, supervisor={body.get('supervisorId')}")
 # ── GET /api/obras ───────────────────────────────────────────────
 @director_bp.route("/api/obras", methods=["GET"])
 @require_auth("director", "supervisor", "proyectista", "secretaria")
