@@ -1,7 +1,5 @@
-const API_BASE = window.location.hostname === "localhost" 
-    ? "http://localhost:5000" 
-    : "https://backend-obraspublicas.onrender.com";
 
+const API_BASE = window.API_BASE || "https://backend-obraspublicas.onrender.com";
 // ── Leer usuario de sessionStorage ──────────────────────────────
 function getCurrentUser() {
   return JSON.parse(sessionStorage.getItem("op_user") || "null");
