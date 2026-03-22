@@ -71,11 +71,11 @@ def create_obra(current_user):
 
     body = request.get_json(silent=True) or {}
 
-    vvalid, err = require_fields(body, "expediente", "nombre", "regionId", "supervisorId", "constructoraId")
+    valid, err = require_fields(body, "expediente", "nombre", "region")
     if not valid:
         return err
 
-    obra_id = f"OBR-{body['expediente']}".strip()
+    obra_id = f"OBR-{body['expediente']}"[:20].strip()
 
     try:
         with get_db() as (conn, cur):
