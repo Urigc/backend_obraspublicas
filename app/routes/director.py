@@ -50,65 +50,62 @@ def get_obras(current_user):
 # ── POST /api/obras
 @director_bp.route("/api/obras", methods=["POST"])
 @require_auth("director")
-def create_obra(current_user):
-
+def create_obra(current_user): 
     body = request.get_json(silent=True) or {}
-    return jsonify({"debug": True, "body_recibido": body}), 200
-    
 
     valid, err = require_fields(body, "expediente", "nombre", "region")
     if not valid:
         return err
 
-    obra_id = f"OBR-{body['expediente']}"[:20].strip()
+    obra_id = f"OBR{body['expediente']}"[:20]
+    presupuesto_id = f"PRE{body['expediente']}"[:10]
 
     try:
         with get_db() as (conn, cur):
-            # 1. INSERT en public.obra (Datos Maestros)
+
             cur.execute("""
                 INSERT INTO public.obra (
                     id_obra, codigo_expediente, nombre_obra, etapa,
                     fecha_inicio, fecha_final, descripcion, beneficiarios,
                     id_constructora, id_region, codigo_supervisor, status
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'activa')
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 obra_id,
-                body["expediente"],
-                body["nombre"],
-                body.get("etapa", 1),
-                body.get("fechaInicio"),
-                body.get("fechaFin"),
-                body.get("descripcion", ""),
-                body.get("beneficiarios", ""),
-                body["constructoraId"],
-                body.get("region", "")[:5],
-                body["supervisorId"]
+                body["expediente"][:15],
+                body["nombre"][:200],
+                int(body.get("etapa", 1)),
+                body.get("fechaInicio") or None,
+                body.get("fechaFin") or None,
+                body.get("descripcion") or "Sin descripción",
+                body.get("beneficiarios") or "Sin especificar",
+                body.get("constructoraId") or body.get("constructora", "CONSTR001"),
+                body.get("region", ""),
+                body.get("supervisorId") or body.get("supervisor", "S001"),
+                "activa"
             ))
 
-            presupuesto_id = f"PRE-{body['expediente']}"[:10].strip()
             cur.execute("""
                 INSERT INTO public.presupuesto_obra (
                     id_presupuesto, presupuesto_total, id_proyectista, id_obra
                 ) VALUES (%s, %s, %s, %s)
             """, (
                 presupuesto_id,
-                body.get("presupuesto", 0),
-                body.get("proyectistaId", "P001"), # Valor por defecto o del body
+                float(body.get("presupuesto") or 0),
+                "P001",
                 obra_id
             ))
 
-            # 3. INSERT en public.financia (Relación M:N con fuentes)
-            fuentes = body.get("fuentes", [])
-            for fuente_id in fuentes:
+            for fuente_id in body.get("fuentes", []):
                 cur.execute("""
                     INSERT INTO public.financia (id_obra, id_fuente)
                     VALUES (%s, %s)
                     ON CONFLICT DO NOTHING
                 """, (obra_id, fuente_id))
 
-        return created({"id": obra_id}, f"Obra '{body['nombre']}' vinculada exitosamente en el sistema.")
+        return created({"id": obra_id}, f"Obra registrada exitosamente.")
 
     except Exception as exc:
+        print(f"[DB ERROR DETALLE] {type(exc).__name__}: {exc}")
         return db_error_response(exc)
 
 
