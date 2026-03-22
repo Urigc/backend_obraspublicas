@@ -75,9 +75,9 @@ def create_obra(current_user):
                 body.get("fechaFin"),
                 body.get("descripcion", ""),
                 body.get("beneficiarios", ""),
-                body["constructoraId"],
-                body.get("region", "")[:5],
-                body["supervisorId"]
+                body.get("constructoraId", "")[:10].strip(),
+                body.get("region", "")[:5].strip(),
+                body.get("supervisorId", "")[:20].strip(),
             ))
 
             presupuesto_id = f"PRE-{body['expediente']}"[:10].strip()
