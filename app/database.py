@@ -21,8 +21,8 @@ def get_db_connection():
             host=os.getenv("DB_HOST", "localhost"),
             port=os.getenv("DB_PORT", "5432"),
             dbname=os.getenv("DB_NAME", "Direccion_Obras_Publicas"),
-            user=os.getenv("urigc"),
-            password=os.getenv("123456"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
             cursor_factory=psycopg2.extras.RealDictCursor
         )
 
