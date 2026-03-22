@@ -26,11 +26,11 @@ def create_app() -> Flask:
     })
 
     # ── Blueprints ────────────────────────────────────────────────
-    from .routes.auth        import auth_bp
-    from .routes.director    import director_bp
-    from .routes.supervisor  import supervisor_bp
-    from .routes.proyectista import proyectista_bp
-    from .routes.secretaria  import secretaria_bp
+    from app.routes.auth        import auth_bp
+    from app.routes.director    import director_bp
+    from app.routes.supervisor  import supervisor_bp
+    from app.routes.proyectista import proyectista_bp
+    from app.routes.secretaria  import secretaria_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(director_bp)

@@ -1,7 +1,7 @@
 
 from functools import wraps
 from flask import request
-from ..helpers import bad_request
+from app.helpers import bad_request
 
 # Roles válidos del sistema
 VALID_ROLES = {"director", "supervisor", "proyectista", "secretaria"}
