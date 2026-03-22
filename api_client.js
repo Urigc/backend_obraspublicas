@@ -76,6 +76,28 @@ async function createObra(obraData) {
   return await API.post("/api/obras", obraData);
 }
 
+async function apiFetch(path, options = {}) {
+  try {
+    const res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers: { ...authHeaders(), ...(options.headers || {}) },
+    });
+    console.log(`[API] ${options.method || 'GET'} ${path} → ${res.status}`);
+    const json = await res.json().catch(() => ({ 
+      success: false, 
+      message: "Respuesta inválida del servidor." 
+    }));
+    console.log(`[API] Response:`, json);
+    if (!res.ok && !json.success) {
+      throw new Error(json.message || `HTTP ${res.status}`);
+    }
+    return json;
+  } catch (err) {
+    console.error(`[API] Error en ${path}:`, err);
+    throw err;
+  }
+}
+
 /**
  * Reemplaza: deleteObra(id) en director.js
  */
