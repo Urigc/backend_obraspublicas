@@ -6,6 +6,7 @@ from app.middleware.auth import require_auth
 
 director_bp = Blueprint("director", __name__)
 
+print(f"[DEBUG] obra_id={obra_id}, constructora={body.get('constructoraId')}, region={body.get('region')}, supervisor={body.get('supervisorId')}")
 # ── GET /api/obras ───────────────────────────────────────────────
 @director_bp.route("/api/obras", methods=["GET"])
 @require_auth("director", "supervisor", "proyectista", "secretaria")
@@ -16,6 +17,7 @@ def get_obras(current_user):
 
     try:
         with get_db() as (conn, cur):
+        
             cur.execute("""
     INSERT INTO public.obra (
         id_obra, codigo_expediente, nombre_obra, etapa,
@@ -277,6 +279,8 @@ def get_fuentes(current_user):
         return ok(rows)
     except Exception as exc:
         return db_error_response(exc)
+    
+
 
 
 # ── POST /api/obras/<id>/fuentes ─────────────────────────────────
