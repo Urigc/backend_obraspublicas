@@ -1,7 +1,7 @@
 
 from flask import Blueprint, request
-from app.database import get_db
-from app.helpers import ok, bad_request, db_error_response
+from ..database import get_db
+from ..helpers import ok, bad_request, db_error_response
 import hashlib
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
