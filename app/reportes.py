@@ -1,8 +1,15 @@
 from flask import Blueprint
 from .helpers import ok, server_error  
 from .database import get_conn
+from flask import request, abort
 
 reportes_bp = Blueprint('reportes', __name__)
+
+@reportes_bp.route('/api/v1/dwh/gasto-fuente', methods=['GET'])
+def get_gasto_fuente():
+    api_key = request.headers.get('X-API-KEY')
+    if api_key != os.getenv("REPORTING_KEY", "clave_temporal_123"):
+        abort(401, description="No autorizado")
 
 @reportes_bp.route('/api/v1/dwh/gasto-fuente', methods=['GET'])
 def get_gasto_fuente():
