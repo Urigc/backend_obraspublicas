@@ -1,6 +1,6 @@
 from flask import Blueprint
-from app.helpers import ok, server_error
-from app.conexion import get_conn 
+from .helpers import ok, server_error  
+from .database import get_conn
 
 reportes_bp = Blueprint('reportes', __name__)
 
