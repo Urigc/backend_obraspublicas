@@ -1,21 +1,7 @@
-import psycopg2
-from dotenv import load_dotenv
-import os
+import sys
+from pathlib import Path
 
-load_dotenv()
+root_path = Path(__file__).parent.parent
+sys.path.append(str(root_path))
 
-def get_conn():
-    db_url = os.getenv("DATABASE_URL")
-    
-    if db_url:
-        return psycopg2.connect(db_url)
-
-def get_conn():
-    return psycopg2.connect(
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT", 5432),
-        dbname=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        sslmode=os.getenv("DB_SSLMODE", "require") 
-    )
+from app.database import get_conn 
