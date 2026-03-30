@@ -1,3 +1,4 @@
+from flask import Flask
 import os
 from flask import Flask, jsonify
 from flask_cors import CORS
@@ -5,7 +6,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
+def create_app():
+    app = Flask(__name__)
+    
 def create_app() -> Flask:
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
@@ -27,6 +30,9 @@ def create_app() -> Flask:
     app.register_blueprint(supervisor_bp)
     app.register_blueprint(proyectista_bp)
     app.register_blueprint(secretaria_bp)
+
+    from .reportes import reportes_bp
+    app.register_blueprint(reportes_bp)
 
     # ── Health check (Render lo usa para saber si el servicio vive) ──
     @app.route("/api/health")
