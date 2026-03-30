@@ -11,3 +11,7 @@ def get_conn():
     if not url:
         raise ValueError("❌ No se encontró DATABASE_URL en el .env")
     return psycopg2.connect(url)
+
+def get_db():
+    """Mantiene vivo el sistema de Auth y rutas viejas"""
+    return get_conn()
