@@ -1,57 +1,13 @@
 import os
 import psycopg2
-import psycopg2.extras   
-from contextlib import contextmanager
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
+env_path = Path(__file__).parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
-
-def get_db_connection():
-    """
-    Detecta si existe DATABASE_URL (para Neon/Render) 
-    o si usa los parámetros por separado (Local).
-    """
-    db_url = os.getenv("DATABASE_URL")
-    if db_url:
-        # Esto es lo que usará Render/Neon
-        return psycopg2.connect(db_url, cursor_factory=psycopg2.extras.RealDictCursor)
-    else:
-        return psycopg2.connect(
-            host=os.getenv("DB_HOST", "localhost"),
-            port=os.getenv("DB_PORT", "5432"),
-            dbname=os.getenv("DB_NAME", "Direccion_Obras_Publicas"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            cursor_factory=psycopg2.extras.RealDictCursor
-        )
-
-@contextmanager
-def get_db():
-    conn = None
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        yield conn, cur
-        conn.commit()
-    except Exception as exc:
-        if conn:
-            conn.rollback()
-        raise exc
-    finally:
-        if conn:
-            conn.close()
-
-
-def test_connection() -> bool:
-    """
-    Prueba de conectividad. Llámala al arrancar la app.
-    Retorna True si la conexión funciona, False si no.
-    """
-    try:
-        with get_db() as (conn, cur):
-            cur.execute("SELECT 1;")
-        return True
-    except Exception as e:
-        print(f"[DB] Error de conexión: {e}")
-        return False
+def get_conn():
+    url = os.getenv("DATABASE_URL")
+    if not url:
+        raise ValueError("❌ No se encontró DATABASE_URL en el .env")
+    return psycopg2.connect(url)
